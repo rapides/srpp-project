@@ -25,11 +25,13 @@ public class MainProgram implements Runnable {
 	private JButton buttonOpen;
 	private JFrame frame;
 	private JLabel openFileL;
+	private DrawPanel drawPanel;
 	
 	/* Program stuff */
 	private ArrayList<City> cities = new ArrayList<City>();
+	private ArrayList<Path> pathes = new ArrayList<Path>();
 	private int numberOfCities = 0;
-	private City magazine;
+	private Magazine magazine = new Magazine();
 	private int k;
 	
 	private class openFile implements ActionListener {
@@ -44,6 +46,9 @@ public class MainProgram implements Runnable {
 				
 				/* Workflow! */
 				MainProgram.this.readValues(directory);
+				/* Test: draw one path */
+				//pathes.add(new Path(cities.get(0), cities.get(1)));
+				drawPanel.repaint();
 				MainProgram.this.alghoritm();
 				MainProgram.this.saveScore(directory);
 			}
@@ -62,7 +67,7 @@ public class MainProgram implements Runnable {
 			
 			/* Read magazine coords */
 			values = bReader.readLine().split(" ");
-			magazine = new City(Integer.parseInt(values[0]), Integer.parseInt(values[1]));
+			magazine.city = new City(Integer.parseInt(values[0]), Integer.parseInt(values[1]));
 			numberOfCities++;
 			
 			/* Read rest of cities */
@@ -103,7 +108,7 @@ public class MainProgram implements Runnable {
 		openFileL = new JLabel("Open file...");
 	
 		frame = new JFrame("SRPP PROJECT");
-		frame.setPreferredSize(new Dimension(450, 250));
+		frame.setPreferredSize(new Dimension(510, 590));
 		frame.setResizable(false);
 		
 		JToolBar bar1 = new JToolBar();
@@ -112,6 +117,9 @@ public class MainProgram implements Runnable {
 		bar1.add(openFileL);
 		bar1.setMargin(new Insets(5, 5, 5, 5));
 		frame.add(bar1, BorderLayout.NORTH);
+		
+		drawPanel = new DrawPanel(cities, pathes, magazine);
+		frame.add(drawPanel, BorderLayout.CENTER);
 		
 		/*JToolBar bar2 = new JToolBar(JToolBar.VERTICAL);
 		bar2.setPreferredSize(new Dimension(150, 350));
@@ -130,16 +138,7 @@ public class MainProgram implements Runnable {
 		bar4.add(buttonPlay);
 		bar4.setMargin(new Insets(5, 5, 5, 5));
 		bar4.setBorder(BorderFactory.createEtchedBorder());
-		frame.add(bar4, BorderLayout.EAST);
-		
-		JToolBar bar3 = new JToolBar(JToolBar.VERTICAL);
-		bar3.setPreferredSize(new Dimension(150, 350));
-		bar3.setFloatable(false);
-		bar3.add(img2);
-		bar3.add(notePostL);
-		bar3.setMargin(new Insets(5, 5, 5, 5));
-		bar3.setBorder(BorderFactory.createEtchedBorder());
-		frame.add(bar3, BorderLayout.CENTER);*/
+		frame.add(bar4, BorderLayout.EAST);*/
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
