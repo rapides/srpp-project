@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -29,7 +31,6 @@ public class MainProgram implements Runnable {
 	
 	/* Program stuff */
 	private ArrayList<City> cities = new ArrayList<City>();
-	private ArrayList<Path> pathes = new ArrayList<Path>();
 	private int numberOfCities = 0;
 	private Magazine magazine = new Magazine();
 	private int k;
@@ -81,8 +82,37 @@ public class MainProgram implements Runnable {
 		}
 	}
 	
+	public ArrayList<ArrayList<Integer>> initialize() {
+		// create list of paths
+		ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
+		
+		//create numbers 1....number of Cities
+		Integer[] arr = new Integer[numberOfCities-1];
+		paths.clear();
+		for (int i = 0; i < numberOfCities-1; i++) {
+			arr[i]=i;
+		}
+		
+		//shuffle numbers
+		Collections.shuffle(Arrays.asList(arr));
+		
+		//create paths
+		for (int i = 0;i<numberOfCities-1; i+=k) {
+			ArrayList<Integer> path = new ArrayList<Integer>();
+			for (int j = 0; j < k ; j++) {
+				if ((i+j)>numberOfCities)
+					break;
+				path.add(arr[i+j]);
+			}
+			paths.add(path);
+		}
+		return paths;
+	}
+	
 	public void alghoritm() {
-		// A place for alghoritm
+		ArrayList<ArrayList<Integer>> paths = initialize();
+		drawPanel.setPaths(paths);
+		drawPanel.repaint();
 	}
 	
 	public void saveScore(String directory) {
@@ -103,6 +133,8 @@ public class MainProgram implements Runnable {
 
 	@Override
 	public void run() {
+		ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
+		
 		buttonOpen = new JButton("Open file");
 		buttonOpen.addActionListener(new openFile());
 		openFileL = new JLabel("Open file...");
@@ -118,27 +150,8 @@ public class MainProgram implements Runnable {
 		bar1.setMargin(new Insets(5, 5, 5, 5));
 		frame.add(bar1, BorderLayout.NORTH);
 		
-		drawPanel = new DrawPanel(cities, pathes, magazine);
+		drawPanel = new DrawPanel(cities, paths ,magazine);
 		frame.add(drawPanel, BorderLayout.CENTER);
-		
-		/*JToolBar bar2 = new JToolBar(JToolBar.VERTICAL);
-		bar2.setPreferredSize(new Dimension(150, 350));
-		bar2.setFloatable(false);
-		bar2.add(img1);
-		bar2.add(recFileL);
-		bar2.setMargin(new Insets(5, 5, 5, 5));
-		bar2.setBorder(BorderFactory.createEtchedBorder());
-		frame.add(bar2, BorderLayout.WEST);
-		
-		JToolBar bar4 = new JToolBar(JToolBar.VERTICAL);
-		bar4.setPreferredSize(new Dimension(150, 350));
-		bar4.setFloatable(false);
-		bar4.add(scoreL);
-		bar4.add(img3);
-		bar4.add(buttonPlay);
-		bar4.setMargin(new Insets(5, 5, 5, 5));
-		bar4.setBorder(BorderFactory.createEtchedBorder());
-		frame.add(bar4, BorderLayout.EAST);*/
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
