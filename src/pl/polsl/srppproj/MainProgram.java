@@ -109,8 +109,28 @@ public class MainProgram implements Runnable {
 		return paths;
 	}
 	
+	public double lengthBeetween (City start, City end) {
+		return Math.sqrt(Math.pow(start.x-end.x,2) + Math.pow(start.y -end.y, 2));
+	}
+	
+	public double totalLength (ArrayList<ArrayList<Integer>> paths) {
+		double sum = 0;
+		for(ArrayList<Integer> path : paths) {
+			//first and last point
+			sum += lengthBeetween(magazine.city, cities.get(path.get(0)));
+			sum += lengthBeetween(magazine.city, cities.get(path.get(path.size()-1)));
+			
+			for(int i=0; i< (path.size()-1); i++) {
+				sum+= lengthBeetween(cities.get(path.get(i)), cities.get(path.get(i+1)));
+			}
+		}
+		return sum;
+	}
+	
 	public void alghoritm() {
 		ArrayList<ArrayList<Integer>> paths = initialize();
+		
+		System.out.println(totalLength(paths));
 		drawPanel.setPaths(paths);
 		drawPanel.repaint();
 	}
