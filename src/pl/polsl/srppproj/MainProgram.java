@@ -153,9 +153,10 @@ public class MainProgram implements Runnable {
 		double Tstart = 1000;
 		double T=  Tstart;
 		double Tmin = 100;
-		double alfa = 0.99999;
+		double alfa = 0.999999;
 		
 		ArrayList<ArrayList<Integer>> temp;
+		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
 		
 		while(T>Tmin) {
 			temp = clonePaths(paths);
@@ -177,7 +178,12 @@ public class MainProgram implements Runnable {
 			if(length1<length2) {
 				paths = temp;
 				
+			} else if (Math.random()<Math.exp((-(length1 - length2))/T)) {
+				globalMin = clonePaths(paths);
+				paths = temp;
 			}
+			
+			
 			
 			System.out.println(Math.round(((Tstart-T)/(Tstart-Tmin))*100)+"%");
 			T*=alfa;	
