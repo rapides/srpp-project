@@ -129,10 +129,58 @@ public class MainProgram implements Runnable {
 	
 	public void alghoritm() {
 		ArrayList<ArrayList<Integer>> paths = initialize();
-		
+		System.out.println(totalLength(paths));
+		paths = simulatedAnnealing(paths);		
 		System.out.println(totalLength(paths));
 		drawPanel.setPaths(paths);
 		drawPanel.repaint();
+	}
+	
+	public ArrayList<ArrayList<Integer>> clonePaths (ArrayList<ArrayList<Integer>> paths) {
+		ArrayList<ArrayList<Integer>> cloned = new ArrayList<ArrayList<Integer>>();
+		for(ArrayList<Integer> path : paths) {
+			cloned.add((ArrayList<Integer>) path.clone());
+		}
+		return cloned;
+	}
+	
+	
+	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
+		int i = 0;
+		double Tstart = 1000;
+		double T=  Tstart;
+		double Tmin = 100;
+		double alfa = 0.99999;
+		
+		ArrayList<ArrayList<Integer>> temp;
+		
+		while(T>Tmin) {
+			temp = clonePaths(paths);
+			
+			int first_path = (int) (Math.random()*temp.size()-1);
+			int second_path = (int) (Math.random()*temp.size()-1);
+			
+			int index_in_first = (int) (Math.random()*temp.get(first_path).size()-1);
+			int index_in_second = (int) (Math.random()*temp.get(second_path).size()-1);
+			
+			Integer tempInteger = temp.get(first_path).get(index_in_first);
+			Integer tempIntege2 = temp.get(second_path).get(index_in_second);
+			temp.get(first_path).set(index_in_first, temp.get(second_path).get(index_in_second));
+			temp.get(second_path).set(index_in_second, tempInteger);
+			
+			double length1 = totalLength(temp);
+			double length2 = totalLength(paths);
+				
+			if(length1<length2) {
+				paths = temp;
+				
+			}
+			
+			System.out.println(Math.round(((Tstart-T)/(Tstart-Tmin))*100)+"%");
+			T*=alfa;	
+		}
+		
+		return paths;
 	}
 	
 	public void saveScore(String directory) {
