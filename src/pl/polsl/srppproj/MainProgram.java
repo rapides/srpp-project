@@ -68,9 +68,11 @@ public class MainProgram implements Runnable {
 			
 			/* Read magazine coords */
 			values = bReader.readLine().split(" ");
+			numberOfCities=0;
 			magazine.city = new City(Integer.parseInt(values[0]), Integer.parseInt(values[1]));
 			numberOfCities++;
 			
+			cities.clear();
 			/* Read rest of cities */
 			while((line = bReader.readLine()) != null) {
 				values = line.split(" ");
@@ -86,6 +88,7 @@ public class MainProgram implements Runnable {
 		// create list of paths
 		ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
 		
+		System.out.println(numberOfCities);
 		//create numbers 1....number of Cities
 		Integer[] arr = new Integer[numberOfCities-1];
 		paths.clear();
@@ -100,7 +103,7 @@ public class MainProgram implements Runnable {
 		for (int i = 0;i<numberOfCities-1; i+=k) {
 			ArrayList<Integer> path = new ArrayList<Integer>();
 			for (int j = 0; j < k ; j++) {
-				if ((i+j)>numberOfCities)
+				if ((i+j)==numberOfCities-1)
 					break;
 				path.add(arr[i+j]);
 			}
