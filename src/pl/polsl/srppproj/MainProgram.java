@@ -8,8 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,11 +50,9 @@ public class MainProgram implements Runnable {
 				
 				/* Workflow! */
 				MainProgram.this.readValues(directory);
-				/* Test: draw one path */
-				//pathes.add(new Path(cities.get(0), cities.get(1)));
 				drawPanel.repaint();
-				MainProgram.this.alghoritm();
-				MainProgram.this.saveScore(directory);
+				ArrayList<ArrayList<Integer>> paths = MainProgram.this.alghoritm();
+				MainProgram.this.saveScore(directory, paths);
 			}
 		}
 	}
@@ -130,13 +131,14 @@ public class MainProgram implements Runnable {
 		return sum;
 	}
 	
-	public void alghoritm() {
+	public ArrayList<ArrayList<Integer>> alghoritm() {
 		ArrayList<ArrayList<Integer>> paths = initialize();
 		System.out.println(totalLength(paths));
 		paths = simulatedAnnealing(paths);		
 		System.out.println(totalLength(paths));
 		drawPanel.setPaths(paths);
 		drawPanel.repaint();
+		return paths;
 	}
 	
 	public ArrayList<ArrayList<Integer>> clonePaths (ArrayList<ArrayList<Integer>> paths) {
@@ -150,9 +152,9 @@ public class MainProgram implements Runnable {
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
 		int i = 0;
-		double Tstart = 1000;
+		double Tstart = 100;
 		double T=  Tstart;
-		double Tmin = 100;
+		double Tmin = 1;
 		double alfa = 0.999999;
 		
 		ArrayList<ArrayList<Integer>> temp;
@@ -168,7 +170,6 @@ public class MainProgram implements Runnable {
 			int index_in_second = (int) (Math.random()*temp.get(second_path).size()-1);
 			
 			Integer tempInteger = temp.get(first_path).get(index_in_first);
-			Integer tempIntege2 = temp.get(second_path).get(index_in_second);
 			temp.get(first_path).set(index_in_first, temp.get(second_path).get(index_in_second));
 			temp.get(second_path).set(index_in_second, tempInteger);
 			
@@ -192,7 +193,28 @@ public class MainProgram implements Runnable {
 		return paths;
 	}
 	
-	public void saveScore(String directory) {
+	public void saveScore(String directory, ArrayList<ArrayList<Integer>> paths) {
+		try{
+			System.out.println("Write to: "+directory+"output");
+			PrintStream ps = new PrintStream(directory+"output");
+			ps.println(totalLength(paths));
+			ps.println(paths.size());
+			
+			for(ArrayList<Integer> path : paths ) {
+				ps.print("0 ");
+				for (int i = 0; i < path.size(); i++) {
+					ps.print(path.get(i)+" ");
+				}
+				ps.print("0");
+				ps.println();
+			}
+			
+	
+			ps.close();
+		}catch (Exception e) {
+			System.out.println("Error: "+e.getMessage());
+		}
+		
 	}
 	
 	public BufferedImage rescale(BufferedImage originalImage) {
