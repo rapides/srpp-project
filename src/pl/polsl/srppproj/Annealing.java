@@ -83,10 +83,10 @@ public class Annealing extends Thread {
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
 		int i = 0;
-		double Tstart = 1000;
+		double Tstart = 10000;
 		double T=  Tstart;
 		double Tmin = 1;
-		double alfa = 0.999999;
+		double alfa = 0.99999;
 		
 		ArrayList<ArrayList<Integer>> temp;
 		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
@@ -121,7 +121,10 @@ public class Annealing extends Thread {
 			T*=alfa;	
 		}
 		
-		return paths;
+		if(totalLength(globalMin)<totalLength(paths))
+			return globalMin;
+		else
+			return paths;
 	}
 	
 	public void saveScore(String directory, ArrayList<ArrayList<Integer>> paths) {
