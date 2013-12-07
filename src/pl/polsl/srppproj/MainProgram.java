@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -195,8 +196,22 @@ public class MainProgram implements Runnable {
 	
 	public void saveScore(String directory, ArrayList<ArrayList<Integer>> paths) {
 		try{
-			System.out.println("Write to: "+directory+"output");
-			PrintStream ps = new PrintStream(directory+"output");
+			File f = new File(directory+"_output");
+			if(f.exists())
+			{
+				System.out.println("Plik istnieje");
+				FileReader fReader = new FileReader(directory+"_output");
+				@SuppressWarnings("resource")
+				BufferedReader bReader = new BufferedReader(fReader);
+				Double lastScore = Double.parseDouble(bReader.readLine());
+				if (lastScore<=totalLength(paths)) {
+					System.out.println("Wynik gorszy... :(");
+					return;
+				}
+			}
+			
+			System.out.println("Write to: "+directory+"_output");
+			PrintStream ps = new PrintStream(directory+"_output");
 			ps.println(totalLength(paths));
 			ps.println(paths.size());
 			
