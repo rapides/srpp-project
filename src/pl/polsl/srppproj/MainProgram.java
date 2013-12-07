@@ -52,8 +52,14 @@ public class MainProgram implements Runnable {
 				/* Workflow! */
 				MainProgram.this.readValues(directory);
 				drawPanel.repaint();
-				ArrayList<ArrayList<Integer>> paths = MainProgram.this.alghoritm();
-				MainProgram.this.saveScore(directory, paths);
+				
+				
+				int processors = Runtime.getRuntime().availableProcessors();
+				for(int i=0; i < processors-1; i++) {
+				  Thread yourThread = new Annealing(cities,numberOfCities,magazine,k,directory, drawPanel);
+				  yourThread.start();
+				}
+				//MainProgram.this.saveScore(directory, paths);
 			}
 		}
 	}
@@ -85,152 +91,9 @@ public class MainProgram implements Runnable {
 			e.printStackTrace();
 		}
 	}
+
 	
-	public ArrayList<ArrayList<Integer>> initialize() {
-		// create list of paths
-		ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
-		
-		System.out.println(numberOfCities);
-		//create numbers 1....number of Cities
-		Integer[] arr = new Integer[numberOfCities-1];
-		paths.clear();
-		for (int i = 0; i < numberOfCities-1; i++) {
-			arr[i]=i;
-		}
-		
-		//shuffle numbers
-		Collections.shuffle(Arrays.asList(arr));
-		
-		//create paths
-		for (int i = 0;i<numberOfCities-1; i+=k) {
-			ArrayList<Integer> path = new ArrayList<Integer>();
-			for (int j = 0; j < k ; j++) {
-				if ((i+j)==numberOfCities-1)
-					break;
-				path.add(arr[i+j]);
-			}
-			paths.add(path);
-		}
-		return paths;
-	}
-	
-	public double lengthBeetween (City start, City end) {
-		return Math.sqrt(Math.pow(start.x-end.x,2) + Math.pow(start.y -end.y, 2));
-	}
-	
-	public double totalLength (ArrayList<ArrayList<Integer>> paths) {
-		double sum = 0;
-		for(ArrayList<Integer> path : paths) {
-			//first and last point
-			sum += lengthBeetween(magazine.city, cities.get(path.get(0)));
-			sum += lengthBeetween(magazine.city, cities.get(path.get(path.size()-1)));
-			
-			for(int i=0; i< (path.size()-1); i++) {
-				sum+= lengthBeetween(cities.get(path.get(i)), cities.get(path.get(i+1)));
-			}
-		}
-		return sum;
-	}
-	
-	public ArrayList<ArrayList<Integer>> alghoritm() {
-		ArrayList<ArrayList<Integer>> paths = initialize();
-		System.out.println(totalLength(paths));
-		paths = simulatedAnnealing(paths);		
-		System.out.println(totalLength(paths));
-		drawPanel.setPaths(paths);
-		drawPanel.repaint();
-		return paths;
-	}
-	
-	public ArrayList<ArrayList<Integer>> clonePaths (ArrayList<ArrayList<Integer>> paths) {
-		ArrayList<ArrayList<Integer>> cloned = new ArrayList<ArrayList<Integer>>();
-		for(ArrayList<Integer> path : paths) {
-			cloned.add((ArrayList<Integer>) path.clone());
-		}
-		return cloned;
-	}
-	
-	
-	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		int i = 0;
-		double Tstart = 100;
-		double T=  Tstart;
-		double Tmin = 1;
-		double alfa = 0.999999;
-		
-		ArrayList<ArrayList<Integer>> temp;
-		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
-		
-		while(T>Tmin) {
-			temp = clonePaths(paths);
-			
-			int first_path = (int) (Math.random()*temp.size()-1);
-			int second_path = (int) (Math.random()*temp.size()-1);
-			
-			int index_in_first = (int) (Math.random()*temp.get(first_path).size()-1);
-			int index_in_second = (int) (Math.random()*temp.get(second_path).size()-1);
-			
-			Integer tempInteger = temp.get(first_path).get(index_in_first);
-			temp.get(first_path).set(index_in_first, temp.get(second_path).get(index_in_second));
-			temp.get(second_path).set(index_in_second, tempInteger);
-			
-			double length1 = totalLength(temp);
-			double length2 = totalLength(paths);
-				
-			if(length1<length2) {
-				paths = temp;
-				
-			} else if (Math.random()<Math.exp((-(length1 - length2))/T)) {
-				globalMin = clonePaths(paths);
-				paths = temp;
-			}
-			
-			
-			
-			System.out.println(Math.round(((Tstart-T)/(Tstart-Tmin))*100)+"%");
-			T*=alfa;	
-		}
-		
-		return paths;
-	}
-	
-	public void saveScore(String directory, ArrayList<ArrayList<Integer>> paths) {
-		try{
-			File f = new File(directory+"_output");
-			if(f.exists())
-			{
-				System.out.println("Plik istnieje");
-				FileReader fReader = new FileReader(directory+"_output");
-				@SuppressWarnings("resource")
-				BufferedReader bReader = new BufferedReader(fReader);
-				Double lastScore = Double.parseDouble(bReader.readLine());
-				if (lastScore<=totalLength(paths)) {
-					System.out.println("Wynik gorszy... :(");
-					return;
-				}
-			}
-			
-			System.out.println("Write to: "+directory+"_output");
-			PrintStream ps = new PrintStream(directory+"_output");
-			ps.println(totalLength(paths));
-			ps.println(paths.size());
-			
-			for(ArrayList<Integer> path : paths ) {
-				ps.print("0 ");
-				for (int i = 0; i < path.size(); i++) {
-					ps.print(path.get(i)+" ");
-				}
-				ps.print("0");
-				ps.println();
-			}
-			
-	
-			ps.close();
-		}catch (Exception e) {
-			System.out.println("Error: "+e.getMessage());
-		}
-		
-	}
+
 	
 	public BufferedImage rescale(BufferedImage originalImage) {
         BufferedImage resizedImage = new BufferedImage(150, 150, BufferedImage.TYPE_INT_RGB);
