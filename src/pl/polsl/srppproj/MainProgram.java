@@ -65,27 +65,29 @@ public class MainProgram implements Runnable {
 							});
 							openFileL.setText(directory + " (" + fileNames.length + " files)");
 							
-							for(int i = 0; i < fileNames.length; i++) {
-								try {
-									String path = directory + "\\" + fileNames[i];
-									System.out.println("Started for file: " + fileNames[i]);
-									openFileL.setText(path + "  (file: " + (i+1) + "/" + fileNames.length + " | records: " + Annealing.getNumberOfRecords() + ")");
-									MainProgram.this.readValues(path);
-									
-									ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
-									drawPanel.setPaths(paths);
-									drawPanel.repaint();
-									
-									
-									Annealing[] threads = new Annealing[Runtime.getRuntime().availableProcessors()-1];
-									
-									for(int j=0; j < threads.length; j++) {
-									  threads[j] = new Annealing(cities,numberOfCities,magazine,k,path, drawPanel);
-									  threads[j].start();
+							for(int x = 0; x < 50; x++) {
+								for(int i = 0; i < fileNames.length; i++) {
+									try {
+										String path = directory + "\\" + fileNames[i];
+										System.out.println("Started for file: " + fileNames[i]);
+										openFileL.setText(path + "  (file: " + (i+1) + "/" + fileNames.length + " | records: " + Annealing.getNumberOfRecords() + ")");
+										MainProgram.this.readValues(path);
+										
+										ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
+										drawPanel.setPaths(paths);
+										drawPanel.repaint();
+										
+										
+										Annealing[] threads = new Annealing[Runtime.getRuntime().availableProcessors()-1];
+										
+										for(int j=0; j < threads.length; j++) {
+										  threads[j] = new Annealing(cities,numberOfCities,magazine,k,path, drawPanel);
+										  threads[j].start();
+										}
+										for(Thread t : threads) t.join();
+									} catch (InterruptedException e) {
+										e.printStackTrace();
 									}
-									for(Thread t : threads) t.join();
-								} catch (InterruptedException e) {
-									e.printStackTrace();
 								}
 							}
 							System.out.println("Done!");
