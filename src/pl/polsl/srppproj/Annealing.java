@@ -50,7 +50,7 @@ public class Annealing extends Thread {
 			}
 			
 			//uncoment below if dont want to make different length of paths
-			//int rand_k = k;
+			rand_k = k;
 			
 			System.out.println("Rand k:" + rand_k);
 			for (int j = 0; j < rand_k ; j++) {
@@ -116,15 +116,15 @@ public class Annealing extends Thread {
 	
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		double Tstart = 1000000;
+		double Tstart = 100;
 		double T=  Tstart;
-		double Tmin = 100;
-		double alfa = 0.99999;
+		double Tmin = 10;
+		double alfa = 0.999998;
 		
 		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
-		
+		int i=0;
 		while(T>Tmin) {			
-			
+			i++;
 			int first_path = (int) (Math.random()*paths.size()-1);
 			int second_path = (int) (Math.random()*paths.size()-1);
 			
@@ -155,7 +155,7 @@ public class Annealing extends Thread {
 			
 			T*=alfa;	
 		}
-		
+		System.out.println("Iteracji: "+i);
 		if(totalLength(globalMin)<totalLength(paths))
 			return globalMin;
 		else
