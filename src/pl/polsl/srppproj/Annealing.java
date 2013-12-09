@@ -82,7 +82,6 @@ public class Annealing extends Thread {
 	
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		int i = 0;
 		double Tstart = 10000;
 		double T=  Tstart;
 		double Tmin = 1;
@@ -111,7 +110,8 @@ public class Annealing extends Thread {
 				paths = temp;
 				
 			} else if (Math.random()<Math.exp((-(length1 - length2))/T)) {
-				globalMin = clonePaths(paths);
+				if (totalLength(globalMin)>totalLength(paths))
+					globalMin = clonePaths(paths);
 				paths = temp;
 			}
 			
