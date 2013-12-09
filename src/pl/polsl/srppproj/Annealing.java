@@ -116,10 +116,10 @@ public class Annealing extends Thread {
 	
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		double Tstart = 100;
+		double Tstart = 10000;
 		double T=  Tstart;
-		double Tmin = 10;
-		double alfa = 0.999998;
+		double Tmin = 100;
+		double alfa = 0.99999;
 		
 		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
 		int i=0;
