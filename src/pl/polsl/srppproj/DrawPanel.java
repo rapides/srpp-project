@@ -45,10 +45,10 @@ public class DrawPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if(!cities.isEmpty() && magazine.city != null) {
 	        g2d.setColor(Color.RED);
-	        g2d.fillOval(magazine.city.x-2, magazine.city.y-2, 7, 7);
+	        g2d.fillOval(magazine.city.x-3, magazine.city.y-3, 7, 7);
 	        g2d.setColor(Color.BLACK);
 	        for(City c : cities) {
-	        	g2d.fillOval(c.x-1, c.y-1, 5, 5);
+	        	g2d.fillOval(c.x-2, c.y-2, 5, 5);
 	        }
 	        
 	        if(!paths.isEmpty())

@@ -82,7 +82,6 @@ public class Annealing extends Thread {
 	
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		int i = 0;
 		double Tstart = 10000;
 		double T=  Tstart;
 		double Tmin = 1;
@@ -180,7 +179,7 @@ public class Annealing extends Thread {
 			saveScore(path, paths);
 		}
 		
-		System.out.println("Koniec w¹tku.");
+		System.out.println("Koniec wï¿½tku.");
 		
 	}
 	
