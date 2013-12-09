@@ -51,6 +51,8 @@ public class MainProgram implements Runnable {
 				
 				/* Workflow! */
 				MainProgram.this.readValues(directory);
+				ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
+				drawPanel.setPaths(paths);
 				drawPanel.repaint();
 				
 				
