@@ -82,44 +82,67 @@ public class Annealing extends Thread {
 		return cloned;
 	}
 	
+	public ArrayList<ArrayList<Integer>> exchange_beetween_paths (ArrayList<ArrayList<Integer>> paths, int path1, int path2) {
+		int index_in_first = (int) (Math.random()*paths.get(path1).size()-1);
+		int index_in_second = (int) (Math.random()*paths.get(path2).size()-1);
+		
+		Integer tempInteger = paths.get(path1).get(index_in_first);
+		paths.get(path1).set(index_in_first, paths.get(path2).get(index_in_second));
+		paths.get(path2).set(index_in_second, tempInteger);
+		
+		return paths;
+	}
+	
+	public ArrayList<ArrayList<Integer>> change_order_in_path (ArrayList<ArrayList<Integer>> paths, int path) {
+		int index_first = (int) (Math.random()*paths.get(path).size()-1);
+		int index_second = (int) (Math.random()*paths.get(path).size()-1);
+		
+		Integer tempInteger = paths.get(path).get(index_first);
+		paths.get(path).set(index_first, paths.get(path).get(index_second));
+		paths.get(path).set(index_second, tempInteger);
+		
+		return paths;
+	}
+	
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		double Tstart = 10000;
+		double Tstart = 1000000;
 		double T=  Tstart;
-		double Tmin = 1;
-		double alfa = 0.99999;
+		double Tmin = 100;
+		double alfa = 0.999997;
 		
-		ArrayList<ArrayList<Integer>> temp;
 		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
 		
-		while(T>Tmin) {
-			temp = clonePaths(paths);
+		while(T>Tmin) {			
 			
-			int first_path = (int) (Math.random()*temp.size()-1);
-			int second_path = (int) (Math.random()*temp.size()-1);
+			int first_path = (int) (Math.random()*paths.size()-1);
+			int second_path = (int) (Math.random()*paths.size()-1);
 			
-			int index_in_first = (int) (Math.random()*temp.get(first_path).size()-1);
-			int index_in_second = (int) (Math.random()*temp.get(second_path).size()-1);
+			ArrayList<ArrayList<Integer>> exchange_beetween_paths = exchange_beetween_paths (clonePaths(paths), first_path, second_path);
+			ArrayList<ArrayList<Integer>> change_order_in_path1 = change_order_in_path (clonePaths(paths), first_path);
+			ArrayList<ArrayList<Integer>> change_order_in_path2 = change_order_in_path (clonePaths(paths), second_path);
 			
-			Integer tempInteger = temp.get(first_path).get(index_in_first);
-			temp.get(first_path).set(index_in_first, temp.get(second_path).get(index_in_second));
-			temp.get(second_path).set(index_in_second, tempInteger);
-			
-			double length1 = totalLength(temp);
-			double length2 = totalLength(paths);
+			double before_length= totalLength(paths);
+			ArrayList<ArrayList<Integer>> localmin = exchange_beetween_paths;
+			if(totalLength(change_order_in_path1)<totalLength(localmin))
+			{
+				localmin=change_order_in_path1;
+			}
+			if(totalLength(change_order_in_path2)<totalLength(localmin))
+			{
+				localmin=change_order_in_path2;
+			}
+			double best_proposal = totalLength(localmin);
 				
-			if(length1<length2) {
-				paths = temp;
+			if(best_proposal<before_length) {
+				paths = localmin;
 				
-			} else if (Math.random()<Math.exp((-(length1 - length2))/T)) {
+			} else if (Math.random()<Math.exp((-(best_proposal - before_length))/T)) {
 				if (totalLength(globalMin)>totalLength(paths))
 					globalMin = clonePaths(paths);
-				paths = temp;
+				paths = localmin;
 			}
 			
-			
-			//draw precentage progress
-			//System.out.println(Math.round(((Tstart-T)/(Tstart-Tmin))*100)+"%");
 			T*=alfa;	
 		}
 		
@@ -205,6 +228,6 @@ public class Annealing extends Thread {
 			saveScore(path, paths);
 		}
 		
-		System.out.println("Koniec w�tku.");
+		System.out.println("Koniec watku.");
 	}
 }
