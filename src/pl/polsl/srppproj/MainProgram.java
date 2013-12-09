@@ -12,11 +12,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -44,24 +46,72 @@ public class MainProgram implements Runnable {
 		@Override
 		public void actionPerformed(ActionEvent event) {
 			JFileChooser fChooser = new JFileChooser();
+			fChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			int flag = fChooser.showOpenDialog(frame);
 			if(flag == JFileChooser.APPROVE_OPTION) {
-				String directory = fChooser.getCurrentDirectory().toString() + "\\" + fChooser.getSelectedFile().getName();
-				openFileL.setText(directory);
+				final String directory = fChooser.getCurrentDirectory().toString() + "\\" + fChooser.getSelectedFile().getName();
+				buttonOpen.setEnabled(false);
 				
-				/* Workflow! */
-				MainProgram.this.readValues(directory);
-				ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
-				drawPanel.setPaths(paths);
-				drawPanel.repaint();
-				
-				
-				int processors = Runtime.getRuntime().availableProcessors();
-				for(int i=0; i < processors-1; i++) {
-				  Thread yourThread = new Annealing(cities,numberOfCities,magazine,k,directory, drawPanel);
-				  yourThread.start();
-				}
-				//MainProgram.this.saveScore(directory, paths);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						File dir = new File(directory);
+						if(dir.isDirectory()) {
+							String[] fileNames = dir.list(new FilenameFilter() {
+								@Override
+								public boolean accept(File dir, String name) {
+									return new File(dir, name).isFile();
+								}
+							});
+							openFileL.setText(directory + " (" + fileNames.length + " files)");
+							
+							for(int i = 0; i < fileNames.length; i++) {
+								try {
+									String path = directory + "\\" + fileNames[i];
+									System.out.println("Started for file: " + fileNames[i]);
+									openFileL.setText(path + "  (file: " + (i+1) + "/" + fileNames.length + " | records: " + Annealing.getNumberOfRecords() + ")");
+									MainProgram.this.readValues(path);
+									
+									ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
+									drawPanel.setPaths(paths);
+									drawPanel.repaint();
+									
+									
+									Annealing[] threads = new Annealing[Runtime.getRuntime().availableProcessors()-1];
+									
+									for(int j=0; j < threads.length; j++) {
+									  threads[j] = new Annealing(cities,numberOfCities,magazine,k,path, drawPanel);
+									  threads[j].start();
+									}
+									for(Thread t : threads) t.join();
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							System.out.println("Done!");
+						} else if(dir.isFile()){
+							try {
+								openFileL.setText(directory);
+			                    MainProgram.this.readValues(directory);
+			                    ArrayList<ArrayList<Integer>> paths = new ArrayList<ArrayList<Integer>>();
+			                    drawPanel.setPaths(paths);
+			                    drawPanel.repaint();
+			                    
+			                    Annealing[] threads = new Annealing[Runtime.getRuntime().availableProcessors()-1];
+								
+								for(int i=0; i < threads.length; i++) {
+								  threads[i] = new Annealing(cities,numberOfCities,magazine,k,directory, drawPanel);
+								  threads[i].start();
+								}
+								for(Thread t : threads) t.join();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						buttonOpen.setEnabled(true);
+						Annealing.resetNumberOfRecords();
+					}
+				}).start();
 			}
 		}
 	}
@@ -137,5 +187,4 @@ public class MainProgram implements Runnable {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
-
 }

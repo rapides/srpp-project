@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 public class Annealing extends Thread {
 	private ArrayList<City> cities = new ArrayList<City>();
@@ -15,6 +16,7 @@ public class Annealing extends Thread {
 	private int k;
 	private String path;
 	private DrawPanel drawPanel;
+	private static int records = 0;
 	
 	public Annealing (ArrayList<City> cities, int numberOfCities, Magazine magazine, int k, String path, DrawPanel drawPanel) {
 		this.cities = cities;
@@ -129,9 +131,9 @@ public class Annealing extends Thread {
 	
 	public void saveScore(String directory, ArrayList<ArrayList<Integer>> paths) {
 		try{
-			
-			System.out.println("Write to: "+directory+"_output");
-			PrintStream ps = new PrintStream(directory+"_output");
+			String saveDir = toSaveDirectory(directory);
+			System.out.println("Write to: "+saveDir);
+			PrintStream ps = new PrintStream(saveDir);
 			ps.println(totalLength(paths));
 			ps.println(paths.size());
 			
@@ -152,16 +154,37 @@ public class Annealing extends Thread {
 		
 	}
 	
+	private String toSaveDirectory(String readDirectory) {
+		String[] parts = readDirectory.split(Pattern.quote(File.separator));
+		String saveDir = new String();
+		for(int i = 0; i < parts.length-1; i++) {
+			saveDir += parts[i] + "\\";
+		}
+		saveDir += "scores";
+		(new File(saveDir)).mkdir();
+		saveDir += "\\" + parts[parts.length-1] + "_output";
+		return saveDir;
+	}
+	
+	public static int getNumberOfRecords() {
+		return records;
+	}
+	
+	public static void resetNumberOfRecords() {
+		records = 0;
+	}
+	
 	public void run () {
 		ArrayList<ArrayList<Integer>> paths = initialize();
 		paths = simulatedAnnealing(paths);		
 		System.out.println(totalLength(paths));
 		
-		File f = new File(path+"_output");
+		String savePath = toSaveDirectory(path);
+		File f = new File(savePath);
 		if(f.exists())
 		{
 			try {
-				FileReader fReader = new FileReader(path+"_output");
+				FileReader fReader = new FileReader(f);
 				@SuppressWarnings("resource")
 				BufferedReader bReader = new BufferedReader(fReader);
 				Double lastScore = Double.parseDouble(bReader.readLine());
@@ -169,6 +192,7 @@ public class Annealing extends Thread {
 					drawPanel.setPaths(paths);
 					drawPanel.repaint();
 					saveScore(path, paths);
+					records++;
 				}
 			}
 			catch (Exception e) {
@@ -177,11 +201,10 @@ public class Annealing extends Thread {
 		} else {
 			drawPanel.setPaths(paths);
 			drawPanel.repaint();
+			//(new File(savePath)).mkdirs();
 			saveScore(path, paths);
 		}
 		
 		System.out.println("Koniec w�tku.");
-		
 	}
-	
 }
