@@ -110,7 +110,8 @@ public class Annealing extends Thread {
 				paths = temp;
 				
 			} else if (Math.random()<Math.exp((-(length1 - length2))/T)) {
-				globalMin = clonePaths(paths);
+				if (totalLength(globalMin)>totalLength(paths))
+					globalMin = clonePaths(paths);
 				paths = temp;
 			}
 			
