@@ -44,7 +44,10 @@ public class Annealing extends Thread {
 		//create paths
 		for (int i = 0;i<numberOfCities-1;) {
 			ArrayList<Integer> path = new ArrayList<Integer>();
-			int rand_k = k - (int) (Math.random()*(numberOfCities*0.01));
+			int rand_k = k;
+			if(Math.random()<0.02){
+				rand_k = k - (int) (Math.random()*(numberOfCities*0.01));
+			}
 			
 			//uncoment below if dont want to make different length of paths
 			//int rand_k = k;
