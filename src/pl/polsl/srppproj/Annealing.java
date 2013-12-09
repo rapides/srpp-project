@@ -42,12 +42,19 @@ public class Annealing extends Thread {
 		Collections.shuffle(Arrays.asList(arr));
 		
 		//create paths
-		for (int i = 0;i<numberOfCities-1; i+=k) {
+		for (int i = 0;i<numberOfCities-1;) {
 			ArrayList<Integer> path = new ArrayList<Integer>();
-			for (int j = 0; j < k ; j++) {
-				if ((i+j)==numberOfCities-1)
+			int rand_k = k - (int) (Math.random()*(numberOfCities*0.01));
+			
+			//uncoment below if dont want to make different length of paths
+			//int rand_k = k;
+			
+			System.out.println("Rand k:" + rand_k);
+			for (int j = 0; j < rand_k ; j++) {
+				if (i==numberOfCities-1)
 					break;
-				path.add(arr[i+j]);
+				path.add(arr[i]);
+				i++;
 			}
 			paths.add(path);
 		}
@@ -109,7 +116,7 @@ public class Annealing extends Thread {
 		double Tstart = 1000000;
 		double T=  Tstart;
 		double Tmin = 100;
-		double alfa = 0.999997;
+		double alfa = 0.99999;
 		
 		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
 		
