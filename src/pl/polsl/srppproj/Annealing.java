@@ -46,13 +46,13 @@ public class Annealing extends Thread {
 			ArrayList<Integer> path = new ArrayList<Integer>();
 			int rand_k = k;
 			if(Math.random()<0.02){
-				rand_k = k - (int) (Math.random()*(numberOfCities*0.01));
+				//rand_k = k - (int) (Math.random()*(numberOfCities*0.01));
 			}
 			
 			//uncoment below if dont want to make different length of paths
 			rand_k = k;
 			
-			System.out.println("Rand k:" + rand_k);
+			//System.out.println("Rand k:" + rand_k);
 			for (int j = 0; j < rand_k ; j++) {
 				if (i==numberOfCities-1)
 					break;
@@ -64,6 +64,17 @@ public class Annealing extends Thread {
 		return paths;
 	}
 	
+	public double pathLength (ArrayList<Integer> path) {
+		double sum=0;
+		sum += lengthBeetween(magazine.city, cities.get(path.get(0)));
+		sum += lengthBeetween(magazine.city, cities.get(path.get(path.size()-1)));
+		
+		for(int i=0; i< (path.size()-1); i++) {
+			sum+= lengthBeetween(cities.get(path.get(i)), cities.get(path.get(i+1)));
+		}
+		return sum;
+	}
+	
 	public double lengthBeetween (City start, City end) {
 		return Math.sqrt(Math.pow(start.x-end.x,2) + Math.pow(start.y -end.y, 2));
 	}
@@ -72,12 +83,7 @@ public class Annealing extends Thread {
 		double sum = 0;
 		for(ArrayList<Integer> path : paths) {
 			//first and last point
-			sum += lengthBeetween(magazine.city, cities.get(path.get(0)));
-			sum += lengthBeetween(magazine.city, cities.get(path.get(path.size()-1)));
-			
-			for(int i=0; i< (path.size()-1); i++) {
-				sum+= lengthBeetween(cities.get(path.get(i)), cities.get(path.get(i+1)));
-			}
+			sum += pathLength(path);
 		}
 		return sum;
 	}
@@ -99,11 +105,33 @@ public class Annealing extends Thread {
 		Integer tempInteger = paths.get(path1).get(index_in_first);
 		paths.get(path1).set(index_in_first, paths.get(path2).get(index_in_second));
 		paths.get(path2).set(index_in_second, tempInteger);
-		
+
 		return paths;
 	}
 	
+	public ArrayList<Integer> the_best_path(ArrayList<Integer> path) {
+		ArrayList<Integer> globalMin = (ArrayList<Integer>) path.clone();
+		
+		for(int i =0; i< 10; i++) {
+			//Collections.shuffle(path);
+			int index_first = (int) (Math.random() * (path.size() -1));
+			int index_second = (int) (Math.random() * (path.size() -1));
+			
+			Integer tempInteger = path.get(index_first);
+			path.set(index_first, path.get(index_second));
+			path.set(index_second, tempInteger);
+
+			if(pathLength(path)<pathLength(globalMin))
+				globalMin = (ArrayList<Integer>) path.clone();
+			
+		}
+		return globalMin;
+	}
+	
+	
+	
 	public ArrayList<ArrayList<Integer>> change_order_in_path (ArrayList<ArrayList<Integer>> paths, int path) {
+		
 		int index_first = (int) (Math.random()*paths.get(path).size()-1);
 		int index_second = (int) (Math.random()*paths.get(path).size()-1);
 		
@@ -116,10 +144,10 @@ public class Annealing extends Thread {
 	
 	
 	public ArrayList<ArrayList<Integer>> simulatedAnnealing (ArrayList<ArrayList<Integer>> paths) {
-		double Tstart = 10000;
+		double Tstart = 15000;
 		double T=  Tstart;
-		double Tmin = 100;
-		double alfa = 0.99999;
+		double Tmin = 5;
+		double alfa = 0.999999;
 		
 		ArrayList<ArrayList<Integer>> globalMin = clonePaths(paths);
 		int i=0;
@@ -128,34 +156,40 @@ public class Annealing extends Thread {
 			int first_path = (int) (Math.random()*paths.size()-1);
 			int second_path = (int) (Math.random()*paths.size()-1);
 			
+			
 			ArrayList<ArrayList<Integer>> exchange_beetween_paths = exchange_beetween_paths (clonePaths(paths), first_path, second_path);
-			ArrayList<ArrayList<Integer>> change_order_in_path1 = change_order_in_path (clonePaths(paths), first_path);
-			ArrayList<ArrayList<Integer>> change_order_in_path2 = change_order_in_path (clonePaths(paths), second_path);
+			
 			
 			double before_length= totalLength(paths);
-			ArrayList<ArrayList<Integer>> localmin = exchange_beetween_paths;
-			if(totalLength(change_order_in_path1)<totalLength(localmin))
-			{
-				localmin=change_order_in_path1;
-			}
-			if(totalLength(change_order_in_path2)<totalLength(localmin))
-			{
-				localmin=change_order_in_path2;
-			}
-			double best_proposal = totalLength(localmin);
-				
+			double best_proposal = totalLength(exchange_beetween_paths);
+			double exp = Math.exp((-(best_proposal - before_length))/T);
+			double dif = totalLength(exchange_beetween_paths) - before_length;
+			
+
 			if(best_proposal<before_length) {
-				paths = localmin;
+				paths = exchange_beetween_paths;
 				
-			} else if (Math.random()<Math.exp((-(best_proposal - before_length))/T)) {
+			} else if (dif!=0 && Math.random()<exp) {
 				if (totalLength(globalMin)>totalLength(paths))
+				{
 					globalMin = clonePaths(paths);
-				paths = localmin;
+				}
+				
+				paths=exchange_beetween_paths;
 			}
 			
-			T*=alfa;	
+			T*=alfa;
+			
 		}
-		System.out.println("Iteracji: "+i);
+		
+		for (int j=0; j<paths.size(); j++) {
+			ArrayList<Integer> path_temp = paths.get(j);
+			path_temp = the_best_path(path_temp);
+			paths.set(j, path_temp);
+		}
+		
+		
+		
 		if(totalLength(globalMin)<totalLength(paths))
 			return globalMin;
 		else

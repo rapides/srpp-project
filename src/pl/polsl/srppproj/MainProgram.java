@@ -65,7 +65,7 @@ public class MainProgram implements Runnable {
 							});
 							openFileL.setText(directory + " (" + fileNames.length + " files)");
 							
-							for(int x = 0; x < 50; x++) {
+							for(int x = 0; x < 15; x++) {
 								for(int i = 0; i < fileNames.length; i++) {
 									try {
 										String path = directory + "\\" + fileNames[i];
@@ -99,7 +99,7 @@ public class MainProgram implements Runnable {
 			                    drawPanel.setPaths(paths);
 			                    drawPanel.repaint();
 			                    
-			                    Annealing[] threads = new Annealing[Runtime.getRuntime().availableProcessors()-1];
+			                    Annealing[] threads = new Annealing[Runtime.getRuntime().availableProcessors()-2];
 								
 								for(int i=0; i < threads.length; i++) {
 								  threads[i] = new Annealing(cities,numberOfCities,magazine,k,directory, drawPanel);
